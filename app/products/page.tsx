@@ -24,26 +24,24 @@ interface ProductsPageProps {
 export default function ProductsPage() {
     const toolOutput = useWidgetProps<{
         query?: string;
-        result?: {
-            structuredContent?: {
-                query?: string;
-                products?: Product[];
-                total?: number;
-                error?: string;
-            }
-        };
+        products?: Product[];
+        total?: number;
+        error?: string;
+        timestamp?: string;
     }>();
 
+    console.log('bmt', 'ProductsPage toolOutput:', toolOutput);
     const maxHeight = useMaxHeight() ?? undefined;
     const displayMode = useDisplayMode();
     const isChatGptApp = useIsChatGptApp();
 
-    // Extract data from widget props
-    const data = toolOutput?.result?.structuredContent;
-    const query = data?.query || '';
-    const products = data?.products || [];
-    const total = data?.total || 0;
-    const error = data?.error;
+
+    // Extract data from widget props - data is directly in toolOutput
+    const query = toolOutput?.query || '';
+    const products = toolOutput?.products || [];
+    const total = toolOutput?.total || 0;
+    const error = toolOutput?.error;
+
 
     return (
         <div

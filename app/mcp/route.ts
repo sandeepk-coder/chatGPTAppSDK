@@ -163,7 +163,7 @@ const handler = createMcpHandler(async (server) => {
     async ({ query }) => {
       try {
         const productsData = await fetchProducts(query);
-        
+        console.log('bmt','Fetched products data:', productsData);
         return {
           content: [
             {
