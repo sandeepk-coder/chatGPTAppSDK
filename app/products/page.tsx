@@ -45,7 +45,7 @@ export default function ProductsPage() {
 
     return (
         <div
-            className="max-h-screen bg-gray-50 dark:bg-gray-900 "
+            className="max-h-screen bg-gray-50 dark:bg-gray-900"
             style={{
                 maxHeight,
                 height: displayMode === "fullscreen" ? maxHeight : undefined,
