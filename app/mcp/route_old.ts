@@ -2,12 +2,7 @@ import { baseURL } from "@/baseUrl";
 import { createMcpHandler } from "mcp-handler";
 import { z } from "zod";
 
-import ProductCarousel from '../components/ProductCarousel'; // Adjust path
-
-
-
 const getAppsSdkCompatibleHtml = async (baseUrl: string, path: string) => {
-  console.log('Resolved baseURL in prod:', baseURL); // Server logs on next start
   const result = await fetch(`${baseUrl}${path}`);
   return await result.text();
 };
@@ -32,73 +27,19 @@ function widgetMeta(widget: ContentWidget) {
     "openai/resultCanProduceWidget": true,
   } as const;
 }
-const API_BASE = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL;
 
 // Function to fetch products from DummyJSON API
 const fetchProducts = async (query: string) => {
-  console.log('bmt','Fetching for:', query);
-  console.log("API_BASE URL:", process.env.API_URL);
-  const apiUrl = buildSearchUrl(query);
-  console.log("API_URL:", apiUrl);
   //const response = await fetch(`https://dummyjson.com/products/search?q=${encodeURIComponent(query)}`);
-  //const response = await fetch('https://mapi.indiamart.com/wservce/im/search/?AK=eyJhbGciOiJzaGEyNTYiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiI5KjUqMSo1KjkqIiwiY2R0IjoiMDMtMTEtMjAyNSIsImV4cCI6MTc2MjI1OTExNywiaWF0IjoxNzYyMTcyNzE3LCJpc3MiOiJVU0VSIiwic3ViIjoiMjI5Mzc1OTQifQ.ESjxD7q1vjdrkRkOESI-nxIUzvcp5B_9Em-HPmnxYhE&APP_ACCURACY=&APP_LATITUDE=&APP_LONGITUDE=&APP_MODID=IOS&APP_SCREEN_NAME=Search Products&APP_USER_ID=22937594&VALIDATION_GLID=22937594&VALIDATION_USERCONTACT=9555125193&VALIDATION_USER_IP=106.205.203.214&app_version_no=13.5.6_b_2&biztype_data=&glusrid=22937594&implicit_info_city_data=Gurgaon&implicit_info_cityid_data=70497&modid=IOS&options_filters_catid_data=&page=1&q=${encodeURIComponent(query)}&source=ios.search&ss=jute bag&token=imartenquiryprovider') 
-  const response = await fetch(apiUrl
-     ,{ cache: "no-store" }
-  );
-  
-
-  //console.log('bmt','Response is:',response);
+ const response = await fetch(`https://dummyjson.com/products/`);
+  //const response = await fetch('https://mapi.indiamart.com/wservce/im/search/?AK=eyJhbGciOiJzaGEyNTYiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiI5KjUqMSo1KjkqIiwiY2R0IjoiMDMtMTEtMjAyNSIsImV4cCI6MTc2MjI1OTExNywiaWF0IjoxNzYyMTcyNzE3LCJpc3MiOiJVU0VSIiwic3ViIjoiMjI5Mzc1OTQifQ.ESjxD7q1vjdrkRkOESI-nxIUzvcp5B_9Em-HPmnxYhE&APP_ACCURACY=&APP_LATITUDE=&APP_LONGITUDE=&APP_MODID=IOS&APP_SCREEN_NAME=Search Products&APP_USER_ID=22937594&VALIDATION_GLID=22937594&VALIDATION_USERCONTACT=9555125193&VALIDATION_USER_IP=106.205.203.214&app_version_no=13.5.6_b_2&biztype_data=&glusrid=22937594&implicit_info_city_data=Gurgaon&implicit_info_cityid_data=70497&modid=IOS&options_filters_catid_data=&page=1&q=jute bag&source=ios.search&ss=jute bag&token=imartenquiryprovider') 
+ console.log('bmt','Fetching url :https://dummyjson.com/products/');
   if (!response.ok) {
     throw new Error(`Failed to fetch products: ${response.statusText}`);
   }
   return await response.json();
 };
 
-
-function buildSearchUrl(query: string) {
-  if (!API_BASE) {
-    throw new Error("Missing API_URL or NEXT_PUBLIC_API_URL");
-  }
-  if (!query?.trim()) {
-    throw new Error("Missing query");
-  }
-
-  // This safely handles slashes and avoids double-// issues.
-  const url = new URL("wservce/im/search/", API_BASE);
-
-  const params = new URLSearchParams({
-    AK: "eyJhbGciOiJzaGEyNTYiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiI5KjUqMSo1KjkqIiwiY2R0IjoiMDgtMTEtMjAyNSIsImV4cCI6MTc2MjY1MTAxMiwiaWF0IjoxNzYyNTY0NjEyLCJpc3MiOiJVU0VSIiwic3ViIjoiMjI5Mzc1OTQifQ.E7OR9bhKSGmT696dbj_BAVe_h_4cmgu3rAIGhJCT18E",
-    APP_ACCURACY: "",
-    APP_LATITUDE: "",
-    APP_LONGITUDE: "",
-    APP_MODID: "IOS",
-    APP_SCREEN_NAME: "Search Products",  // no manual encode needed, URLSearchParams handles it
-    APP_USER_ID: "22937594",
-    VALIDATION_GLID: "22937594",
-    VALIDATION_USERCONTACT: "9555125193",
-    VALIDATION_USER_IP: "106.205.203.214",
-    app_version_no: "13.5.6_b_2",
-    biztype_data: "",
-    glusrid: "22937594",
-    implicit_info_city_data: "Gurgaon",
-    implicit_info_cityid_data: "70497",
-    modid: "IOS",
-    options_filters_catid_data: "",
-    page: "1",
-
-    // 🔑 These are now truly dynamic:
-    q: query,
-    ss: query,
-
-    source: "ios.search",
-    token: "imartenquiryprovider",
-    options_start: "0",
-    options_end: "20",
-  });
-
-  url.search = params.toString();
-  return url.toString();
-}
 const handler = createMcpHandler(async (server) => {
   const html = await getAppsSdkCompatibleHtml(baseURL, "/");
   const productsHtml = await getAppsSdkCompatibleHtml(baseURL, "/products");
@@ -226,21 +167,20 @@ const handler = createMcpHandler(async (server) => {
       try {
         const productsDataRaw = await fetchProducts(query);
         console.log('bmt','before transform');
-          const productsData = transformResponse(productsDataRaw)
-          console.log('bmt','after transform');
-          console.log('bmt','Fetched new products data:', productsData);
-        console.log('bmt','Fetched products data:', productsData);
+      //  const productsData = transformResponse(productsDataRaw)
+        console.log('bmt','after transform');
+        console.log('bmt','Fetched new products data:', productsDataRaw);
         return {
           content: [
             {
               type: "text",
-              text: `Found 10 products for "${query}"`,
+              text: `Found ${productsDataRaw} products for "${query}"`,
             },
           ],
           structuredContent: {
             query: query,
-            products: productsData.products,
-            total: 5,
+            products: productsDataRaw,
+            total: productsDataRaw.total,
             timestamp: new Date().toISOString(),
           },
           _meta: widgetMeta(productsWidget),
@@ -265,15 +205,11 @@ const handler = createMcpHandler(async (server) => {
   );
 });
 
-/**
- * Converts IndiaMART-style JSON (image 1) to ProductCarousel-ready format (image 2)
- */
-
 
 type InputFormat = {
   results: Array<{
     fields: {
-      price_f?: string;
+      price_f?: string | number;
       title?: string;
       large_image?: string;
       original_title?:string;
@@ -281,16 +217,13 @@ type InputFormat = {
       address?:string;
       displayid?:string;
       supplier_rating?:string;
-      pdpurl?:string;
-      companyname?: string; // e.g. "Abc Enterprises"
-      location?: string;    // e.g. "Noida"
       [key: string]: any;
     };
   }>;
 };
 
 type OutputProduct = {
-  price: string;
+  price: number;
   title: string;
   thumbnail: string;
   id: string;
@@ -298,16 +231,17 @@ type OutputProduct = {
   rating: string;
   brand: string;
   description: string;
-  pdpurl:string;
-  companyname: string; // e.g. "Abc Enterprises"
-  location: string;    // e.g. "Noida"
+
 };
 
 type OutputFormat = {
   products: OutputProduct[];
 };
 
-function transformResponse(input: InputFormat): OutputFormat {
+/**
+ * Converts IndiaMART-style JSON (image 1) to ProductCarousel-ready format (image 2)
+ */
+export function transformResponse(input: InputFormat): OutputFormat {
   if (!input?.results || !Array.isArray(input.results)) {
     return { products: [] };
   }
@@ -315,21 +249,17 @@ function transformResponse(input: InputFormat): OutputFormat {
   const products: OutputProduct[] = input.results
     .map((item) => {
       const f = item.fields ?? {};
-      const price = (f.price_f || "0").replace(/&#8377;|&amp;#8377;/g, "₹");
+      const priceNum = parseFloat(String(f.price_f || "0"));
       const title = f.title?.trim() || "Unnamed Product";
-      const thumbnail = f.zoomed_image?.trim() || "https://via.placeholder.com/400x300";
+      const thumbnail = f.large_image?.trim() || "https://via.placeholder.com/400x300";
       const id = f.displayid || "1";
       const category = f.original_title?.trim() || "Unnamed Product";
       const rating = f.supplier_rating || "Unnamed Product";
       const brand = f.title?.trim() || "IndiaMART";
       const description = f.address?.trim() || "Unnamed Product";
-      const pdpurl = trimUrl(f.desktop_title_url?.trim())||"www.indiamart.com";
-      const companyname = f.companyname?.trim()||"";
-      const location = f.city?.trim()||"All India";
-
 
       return {
-        price,
+        price: isNaN(priceNum) ? 0 : priceNum,
         title,
         thumbnail,
         id,
@@ -337,22 +267,61 @@ function transformResponse(input: InputFormat): OutputFormat {
         rating,
         brand,
         description,
-        pdpurl,
-        companyname,
-        location,
       };
     })
     .filter((p) => !!p.title);
 
-
   return { products };
 }
 
+// Example usage:
+const apiResponse = {
+  results: [
+    {
+      fields: {
+        price_f: "9.99",
+        title: "Essence Mascara Lash Princess",
+        large_image: "https://example.com/img.jpg",
+      },
+    },
+  ],
+};
 
-function trimUrl(url: string): string {
-  const index = url.indexOf(".html");
-  return index !== -1 ? url.substring(0, index + 5) : url; // +5 to include ".html"
-}
+//console.log(transformResponse(apiResponse));
 
-export const GET = handler;
+
+//export const GET = handler;
 export const POST = handler;
+// app/api/products/route.ts (example path)
+import { NextResponse } from "next/server";
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const query = searchParams.get("q") || "jute bag";
+
+  try {
+    const apiUrl = `https://mapi.indiamart.com/wservce/im/search/?AK=eyJhbGciOiJzaGEyNTYiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiI5KjUqMSo1KjkqIiwiY2R0IjoiMDMtMTEtMjAyNSIsImV4cCI6MTc2MjI1OTExNywiaWF0IjoxNzYyMTcyNzE3LCJpc3MiOiJVU0VSIiwic3ViIjoiMjI5Mzc1OTQifQ.ESjxD7q1vjdrkRkOESI-nxIUzvcp5B_9Em-HPmnxYhE&APP_MODID=ANDROID&page=1&q=${encodeURIComponent(query)}&options_start=0&options_end=20`;
+
+    const res = await fetch(apiUrl);
+    const data = await res.json();
+
+    const results = data?.response?.results;
+    console.log('bmt','GET Function returns:', results);
+    const products = Array.isArray(results)
+      ? results.filter((r: any) => r.PRODUCTNAME).map((item: any, i: number) => ({
+          id: i + 1,
+          title: item.PRODUCTNAME || "Unnamed Product",
+          category: item.CITY || "IndiaMART",
+          // keep price as a string; your carousel shows it next to a currency symbol
+          price: item.PRICE?.toString()?.trim() || "Price on Request",
+          thumbnail: item.PRODUCTIMAGE1 || "https://via.placeholder.com/400x300?text=No+Image",
+          brand: item.COMPANYNAME || "",
+          description: item.MINIMUMORDERQUANTITY ? `MOQ: ${item.MINIMUMORDERQUANTITY}` : "",
+        }))
+      : [];
+
+    return NextResponse.json({ query, total: products.length, products });
+  } catch (err: any) {
+    return NextResponse.json({ query, total: 0, products: [], error: err?.message ?? "Failed to fetch" }, { status: 500 });
+  }
+}
